@@ -3,9 +3,9 @@
 
 #define ClientID "Nodemcu01"
 
-const char *ssid="ACTFIBERNET";
-const char *password="Happy@home";
-const char *mqttserver="broker.hivemq.com";
+const char *ssid="Write Your WIFI SSID ";
+const char *password="Write Your WIFI Password";
+const char *mqttserver="Write Your MQTT Server";
 int port=1883;
 
 WiFiClient espclient;
