@@ -1,42 +1,31 @@
-#include<ESP8266WiFi.h>
-#include<PubSubClient.h>
+#include <DHT.h>
+#include <DHT_U.h>
 
-#define ClientID "Nodemcu01"
+#include<ESP8266WiFi.h> // Nodemcu Library
+#include<PubSubClient.h> // MQTT Library
 
-const char *ssid="ACTFIBERNET";
-const char *password="Happy@home";
-const char *mqttserver="broker.hivemq.com";
-int port=1883;
+#define ClientID "Nodemcu01" //ClientID Creation
 
-WiFiClient espclient;
-PubSubClient client(espclient);
+#define dhtpin 5
+#define dhttype DHT11
 
+const char *ssid="Write Your WIFI SSID"; //WiFi Username
+const char *password="Write Your WIFI Password; //WiFi Password
+const char *mqttserver="Write Your MQTT Server"; //MQTT Server
+int port=1883; // MQTT Port
 
-void callback(char* topic, byte* payload, unsigned int length) {
-  Serial.print("Message arrived [");
-  Serial.print(topic);
-  Serial.print("] ");
-  for (int i = 0; i < length; i++) {
-    Serial.print((char)payload[i]);
-  }
-  Serial.println();
-  if((char)payload[0]=='1')
-  {
-    digitalWrite(16,LOW);
-    Serial.println("LED ON");
-    client.publish("iot/data","LED ON");
-  }
-  else if((char)payload[0]=='0')
-  {
-    digitalWrite(16,HIGH);
-    Serial.println("LED OFF");
-    client.publish("iot/data","LED OFF");
-  }
-}
+char msg[30];
+String mesg;
+float temp,hum;
+
+WiFiClient espclient; // WiFi client Creation
+PubSubClient client(espclient); // Add WiFi client to MQTT Library
+DHT dht(dhtpin,dhttype);
 
 void setup() {
-   pinMode(16,OUTPUT);
 
+     dht.begin();
+/****************WiFi Connection Start ********************/
   Serial.begin(9600);
   Serial.println("WiFi Connect with username: "+String(ssid));
   Serial.println("=================================");
@@ -48,13 +37,17 @@ void setup() {
   }
   Serial.print("\n WiFi Connected with IP: ");
   Serial.println(WiFi.localIP());
-  client.setServer(mqttserver,port);
-  client.subscribe("iot/subdata");
-  client.setCallback(callback);
+
+ /****************WiFi Connection End ********************/
+ 
+  client.setServer(mqttserver,port); // Set the MQTT Server
+
 
 }
 
 void loop() {
+
+  /***********MQTT Server reconnect**************/
   if(!client.connected())
   {
     while(!client.connected())
@@ -62,8 +55,7 @@ void loop() {
       Serial.println("Attempting to MQTT Connection");
       if(client.connect(ClientID))
       {
-        client.subscribe("iot/subdata");
-        client.publish("iot/data","Attempting connected");
+
         Serial.println("client Connected with "+String(ClientID));
         
       }
@@ -72,8 +64,13 @@ void loop() {
         
   }
    
-   
-   client.loop();
+   temp=dht.readTemperature();
+   hum=dht.readHumidity();
+   mesg=String(temp)+"-"+String(hum);
+   Serial.println(mesg);
+   mesg.toCharArray(msg,30); // String to Char Array
+   client.publish("iotsubdata",msg); // Publish the Message
+   delay(1000); //Wait for one Second
    
 
   
