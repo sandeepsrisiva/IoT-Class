@@ -9,8 +9,8 @@
 
 DHT dhtsen(dhtpin,sensortype);
 
-const char *ssid="sandeep";
-const char *pwd="22122012";
+const char *ssid="Write Your WiFi Username";
+const char *pwd="Write Your WiFi Password";
 
 void setup() {
   Serial.begin(9600);
