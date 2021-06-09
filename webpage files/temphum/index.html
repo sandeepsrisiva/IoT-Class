@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html>
+<head>
+   <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/icon" href="https://technicalhub.io/img/logo.png">
+  <title>Temperature and Humidity</title>
+  <!--- Bootstrap Style sheet link -->
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+ 
+  <!---Jquery Script link-->
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+
+<!---MQTT Script link -->
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.min.js" type="text/javascript"></script>
+
+<!--ICon Link --->
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+
+
+<link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+<style type="text/css">
+  body {
+    font-family: "Poppins";
+    font-size: 20px;
+  }
+
+</style>
+</head>
+<body>
+  <div class="container">
+    <br>
+    <h1><center>Temperature and Humidity</center></h1>
+
+    <div id="temphum" style="border:2px solid gray;"></div>
+
+  </div>
+
+  <script type="text/javascript">
+    
+    $(document).ready(function(){
+      clientID = "clientID-" + parseInt(Math.random() * 100);
+
+        // Fetch the hostname/IP address and port number from the form
+        host = "Write Your MQTT Server";
+        port = "Write Your MQTT Web Socket Port";
+
+       
+        // Initialize new Paho client connection
+        client = new Paho.MQTT.Client(host, Number(port), clientID);
+
+        // Set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        // Connect the client, if successful, call onConnect function
+        client.connect({ 
+            onSuccess: onConnect,
+        });
+        console.log( "ready!" );
+  
+    });
+
+
+    function onConnect()
+    {
+      
+      client.subscribe("Write Your Subscriber Topic");
+      console.log("Server Connected");
+    }
+
+    function onConnectionLost(responseObject) {
+        console.log("onConnectionLost: Connection Lost");
+        if (responseObject.errorCode !== 0) {
+            console.log("onConnectionLost: " + responseObject.errorMessage);
+        }
+    }
+
+    function onMessageArrived(message)
+    {
+      
+      console.log("Message Arrived:"+message.payloadString);
+      document.getElementById("temphum").innerHTML += 'Topic:<span style="color:#0B5ED7; font-weight:bold;"> ' + message.destinationName + '  </span><br>Message:<span style="color:#6AB190;font-weight:bold;"> ' + message.payloadString + '</span><br><br/>';
+      updateScroll();
+      
+
+    }
+
+    function updateScroll() {
+    var element = document.getElementById("temphum");
+    element.scrollTop = element.scrollHeight;
+}
+
+
+  </script>
+
+
+
+</body>
+</html>
