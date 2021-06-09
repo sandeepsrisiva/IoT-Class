@@ -11,9 +11,9 @@
 #define dhtpin 5
 #define dhttype DHT11
 
-const char *ssid="ACTFIBERNET"; //WiFi Username
-const char *password="Happy@home"; //WiFi Password
-const char *mqttserver="54.197.40.209"; //MQTT Server
+const char *ssid="WiFI_SSIS"; //WiFi Username
+const char *password="WIFI_Password"; //WiFi Password
+const char *mqttserver="MQTT SERVER"; //MQTT Server
 int port=1883; // MQTT Port
 
 char msg[30];
