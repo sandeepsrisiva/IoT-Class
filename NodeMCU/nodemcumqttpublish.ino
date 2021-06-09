@@ -10,7 +10,7 @@
 #define dhttype DHT11
 
 const char *ssid="Write Your WIFI SSID"; //WiFi Username
-const char *password="Write Your WIFI Password; //WiFi Password
+const char *password="Write Your WIFI Password"; //WiFi Password
 const char *mqttserver="Write Your MQTT Server"; //MQTT Server
 int port=1883; // MQTT Port
 
