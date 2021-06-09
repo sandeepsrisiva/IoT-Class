@@ -1,0 +1,345 @@
+<!DOCTYPE html>
+<html>
+<head>
+  
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <link rel="icon" type="image/icon" href="https://technicalhub.io/img/logo.png">
+  <title>WMS | Technical Hub</title>
+  <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+ 
+
+  <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+  <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+
+<!-- amcharts library-->
+  <script src="https://cdn.amcharts.com/lib/4/core.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/charts.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/kelly.js"></script>
+<script src="https://cdn.amcharts.com/lib/4/themes/animated.js"></script>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/paho-mqtt/1.0.2/mqttws31.min.js" type="text/javascript"></script>
+<link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.13.0/css/all.min.css" rel="stylesheet">
+
+<link href='https://fonts.googleapis.com/css?family=Poppins' rel='stylesheet'>
+<style>
+body {
+    font-family: 'Poppins';font-size: 12px;
+}
+.footer {
+  position: fixed;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  background-color: #343A40;
+  text-align: center;
+  color: white;
+  
+  padding:15px 15px 15px 15px;
+}
+img
+{
+  width:150px;
+}
+@media only screen and (max-width: 360px) {
+  body {
+    font-size: 10px;
+  }
+}
+@media only screen and (min-width: 764px) and (max-width: 981px) {
+  body {
+    font-size: 8px;
+  }
+}
+</style>
+</head>
+<body>
+  <nav class="navbar navbar-expand-sm bg-dark navbar-dark">
+ <a class="navbar-brand" href="#">
+  <i class="fas fa-cloud-sun"></i>
+    <!-- <img src="https://getbootstrap.com/docs/4.0/assets/brand/bootstrap-solid.svg" width="30" height="30" class="d-inline-block align-top" alt=""> -->
+    Weather Monitoring System
+  </a>
+  <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#collapsibleNavbar">
+    <span class="navbar-toggler-icon"></span>
+  </button>
+
+</nav>
+<div class="clearfix"></div><br>
+  <div class="container">
+  <div class="row ">
+    <div class="col-md-6">
+      <center><span style="font-size: 30px;">Temperature&nbsp;<i class="fas fa-temperature-low"></i>C</span></center>
+      <div id="chartdiv" style="width: 100%;height: 400px;"></div>
+    </div>
+    <div class="col-md-6">
+       <center><span style="font-size: 30px;">Humidity&nbsp;<i class="fas fa-tint"></i>%</span></center>
+     <div id="chartdiv1" style="width: 100%; height: 400px;"></div>
+    </div>
+   
+
+  
+
+  </div>
+
+</div>
+
+<footer class="footer">
+  <span style="font-size:16px;" id="copyright"></span>
+  
+</footer>
+  <script type="text/javascript">
+          $( document ).ready(function() {
+              clientID = "clientID-" + parseInt(Math.random() * 100);
+
+        // Fetch the hostname/IP address and port number from the form
+        host = "54.197.40.209";
+        port = "8033";
+
+       
+        // Initialize new Paho client connection
+        client = new Paho.MQTT.Client(host, Number(port), clientID);
+
+        // Set callback handlers
+        client.onConnectionLost = onConnectionLost;
+        client.onMessageArrived = onMessageArrived;
+
+        // Connect the client, if successful, call onConnect function
+        client.connect({ 
+            onSuccess: onConnect,
+        });
+        console.log( "ready!" );
+        var d = new Date();
+  var n = d.getFullYear();
+  document.getElementById("copyright").innerHTML = "Copyrights © IoT Hub "+n+" | Powered by &nbsp;<img src='https://technicalhub.io/img/darklogo.png' >";
+    });
+      // Called after form input is processed
+
+// Set theme
+
+am4core.useTheme(am4themes_kelly);
+am4core.useTheme(am4themes_animated);
+am4core.addLicense("ch-custom-attribution");
+
+// Create chart
+var chart = am4core.create("chartdiv", am4charts.GaugeChart);
+chart.innerRadius = am4core.percent(82);
+chart.responsive.enabled = true;
+
+
+// Create axis
+var axis = chart.xAxes.push(new am4charts.ValueAxis());
+axis.min = 0;
+axis.max = 50;
+axis.strictMinMax = true;
+axis.renderer.radius = am4core.percent(80);
+axis.renderer.inside = true;
+axis.renderer.line.strokeOpacity = 1;
+axis.renderer.ticks.template.disabled = false
+axis.renderer.ticks.template.strokeOpacity = 1;
+axis.renderer.ticks.template.length = 10;
+axis.renderer.grid.template.disabled = true;
+axis.renderer.labels.template.radius = 40;
+axis.renderer.labels.template.adapter.add("text", function(text) {
+  return text + "°C";
+})
+
+// Set inner radius
+var colorSet = new am4core.ColorSet();
+
+var axis2 = chart.xAxes.push(new am4charts.ValueAxis());
+axis2.min = 0;
+axis2.max = 50;
+axis2.strictMinMax = true;
+axis2.renderer.labels.template.disabled = true;
+axis2.renderer.ticks.template.disabled = true;
+axis2.renderer.grid.template.disabled = true;
+
+var range0 = axis2.axisRanges.create();
+range0.value = 0;
+range0.endValue = 25;
+range0.axisFill.fillOpacity = 1;
+range0.axisFill.fill = am4core.color("#88AB75");
+
+var range1 = axis2.axisRanges.create();
+range1.value = 25;
+range1.endValue = 50;
+range1.axisFill.fillOpacity = 1;
+range1.axisFill.fill = colorSet.getIndex(1);
+
+var label = chart.radarContainer.createChild(am4core.Label);
+label.isMeasured = false;
+label.fontSize = 25;
+label.x = am4core.percent(50);
+label.y = am4core.percent(100);
+label.horizontalCenter = "middle";
+label.verticalCenter = "bottom";
+label.text = "0°C";
+
+var hand = chart.hands.push(new am4charts.ClockHand());
+hand.pin.disabled = true;
+hand.fill = am4core.color("#2D93AD");
+hand.stroke = am4core.color("#2D93AD");
+hand.innerRadius = am4core.percent(30);
+hand.radius = am4core.percent(80);
+hand.startWidth = 5;
+hand.axis = axis2;
+hand.value=0
+
+hand.events.on("propertychanged", function(ev) {
+  range0.endValue = ev.target.value;
+  range1.value = ev.target.value;
+  // label.text = axis2.positionToValue(hand.currentPosition).toFixed(1);
+  axis2.invalidate();
+});
+
+var chart1 = am4core.create("chartdiv1", am4charts.GaugeChart);
+chart1.innerRadius = am4core.percent(82);
+chart1.responsive.enabled = true;
+
+
+// Create axis
+var axis01 = chart1.xAxes.push(new am4charts.ValueAxis());
+axis01.min = 0;
+axis01.max = 100;
+axis01.strictMinMax = true;
+axis01.renderer.radius = am4core.percent(80);
+axis01.renderer.inside = true;
+axis01.renderer.line.strokeOpacity = 1;
+axis01.renderer.ticks.template.disabled = false
+axis01.renderer.ticks.template.strokeOpacity = 1;
+axis01.renderer.ticks.template.length = 10;
+axis01.renderer.grid.template.disabled = true;
+axis01.renderer.labels.template.radius = 40;
+axis01.renderer.labels.template.adapter.add("text", function(text) {
+  return text + "%";
+})
+
+// Set inner radius
+var colorSet = new am4core.ColorSet();
+
+var axis21 = chart1.xAxes.push(new am4charts.ValueAxis());
+axis21.min = 0;
+axis21.max = 100;
+axis21.strictMinMax = true;
+axis21.renderer.labels.template.disabled = true;
+axis21.renderer.ticks.template.disabled = true;
+axis21.renderer.grid.template.disabled = true;
+
+var range01 = axis21.axisRanges.create();
+range01.value = 0;
+range01.endValue = 50;
+range01.axisFill.fillOpacity = 1;
+range01.axisFill.fill = am4core.color("#88AB75");
+
+var range11 = axis21.axisRanges.create();
+range11.value = 50;
+range11.endValue = 100;
+range11.axisFill.fillOpacity = 1;
+range11.axisFill.fill = colorSet.getIndex(1);
+
+var label1 = chart1.radarContainer.createChild(am4core.Label);
+label1.isMeasured = false;
+label1.fontSize = 25;
+label1.x = am4core.percent(50);
+label1.y = am4core.percent(100);
+label1.horizontalCenter = "middle";
+label1.verticalCenter = "bottom";
+label1.text = "0%";
+
+var hand1 = chart1.hands.push(new am4charts.ClockHand());
+hand1.pin.disabled = true;
+hand1.fill = am4core.color("#2D93AD");
+hand1.stroke = am4core.color("#2D93AD");
+hand1.innerRadius = am4core.percent(30);
+hand1.radius = am4core.percent(80);
+hand1.startWidth = 5;
+hand1.axis = axis21;
+hand1.value=0
+
+hand1.events.on("propertychanged", function(ev) {
+  range01.endValue = ev.target.value;
+  range11.value = ev.target.value;
+  // label.text = axis2.positionToValue(hand.currentPosition).toFixed(1);
+  axis21.invalidate();
+});
+
+// Called when the client connects
+function onConnect() {
+    // Fetch the MQTT topic from the form
+    topic = "iot/dht/node1"
+
+   
+
+    // // Subscribe to the requested topic
+    client.subscribe(topic);
+    console.log("Server Conneted");
+}
+
+// Called when the client loses its connection
+function onConnectionLost(responseObject) {
+    console.log("onConnectionLost: Connection Lost");
+    if (responseObject.errorCode !== 0) {
+        console.log("onConnectionLost: " + responseObject.errorMessage);
+    }
+}
+
+function publish(resmessage)
+{
+    // pmessage=document.getElementById("Pmessage").value;
+    message=new Paho.MQTT.Message(resmessage);
+    message.destinationName = "stext";
+    message.qos = 0;
+
+    client.send(message);
+}
+
+
+// Called when a message arrives
+function onMessageArrived(message) {
+    var months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+var days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"];
+var d = new Date();
+var day = days[d.getDay()];
+var hr = d.getHours();
+var min = d.getMinutes();
+var sec = d.getSeconds();
+if (min < 10) {
+    min = "0" + min;
+}
+var ampm = "am";
+if( hr > 12 ) {
+    hr -= 12;
+    ampm = "pm";
+}
+var date = d.getDate();
+var month = months[d.getMonth()];
+var year = d.getFullYear();
+    
+    
+    console.log("onMessageArrived: " + message.payloadString);
+    var values=message.payloadString;
+    var data=values.split('-');
+    // var splvalues=values.split("-")
+    label.text = data[0] + "°C" ;
+    hand.value=parseFloat(data[0]);
+    label1.text = data[1] + "%" ;
+    hand1.value=parseFloat(data[1]);
+    
+}
+
+// Called when the disconnection button is pressed
+function startDisconnect() {
+    client.disconnect();
+    
+    alert("Server Disconnected")
+}
+
+
+    </script>
+    
+
+</body>
+</html>
