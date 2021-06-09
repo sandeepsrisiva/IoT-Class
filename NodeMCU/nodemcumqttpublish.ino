@@ -69,7 +69,7 @@ void loop() {
    mesg=String(temp)+"-"+String(hum);
    Serial.println(mesg);
    mesg.toCharArray(msg,30); // String to Char Array
-   client.publish("iotsubdata",msg); // Publish the Message
+   client.publish("Write Your Publish Topic",msg); // Publish the Message
    delay(1000); //Wait for one Second
    
 
