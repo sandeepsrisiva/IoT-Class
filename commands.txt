@@ -1,0 +1,39 @@
+Apache2 installation
+--------------------
+sudo apt-get install apache2
+
+
+mysql installation
+-------------------
+sudo apt-get install mysql-server
+sudo mysql
+use mysql
+ALTER USER 'root'@'localhost' IDENTIFIED WITH mysql_native_password BY 'yourpassword';
+FLUSH PRIVILEGES;
+exit
+
+
+php installation
+-----------------
+sudo apt-get install php libapache2-mod-php php-mysql
+sudo nano /etc/apache2/mods-enabled/dir.conf
+Replace this code
+<IfModule mod_dir.c>
+    DirectoryIndex index.php index.html index.cgi index.pl index.xhtml index.htm
+</IfModule>
+
+ctrl+x and press y then enter
+
+sudo systemctl restart apache2
+
+
+
+phpmyadmin installation
+------------------------
+
+sudo apt-get install phpmyadmin
+
+in the config file press space and press tab and press enter
+
+after the config file press enter
+give the mysql root password and confirm the password

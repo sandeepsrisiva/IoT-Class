@@ -1,0 +1,18 @@
+sudo apt-get update
+sudo apt-get upgrade
+sudo apt-get install mosquitto mosquitto-clients
+
+sudo systemctl status mosquitto
+
+sudo nano /etc/mosquitto/conf.d/default.conf
+
+listener 1883
+
+
+listener 8083
+protocol websockets
+
+ctrl+x => y => enter
+
+sudo systemctl restart mosquitto
+sudo systemctl status mosquitto
