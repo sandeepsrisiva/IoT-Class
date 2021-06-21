@@ -2,8 +2,8 @@
 
 	$servername = "localhost";
 	$username = "root";
-	$password = "Test@123";
-	$dbname = "iotdata";
+	$password = "yourdatabase password";
+	$dbname = "yourdatabase";
 
 	$con=mysqli_connect($servername,$username,$password,$dbname);
 
